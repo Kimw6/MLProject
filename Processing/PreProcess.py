@@ -1,4 +1,4 @@
-from PreProcessing.GraphClass import Graph
+from Processing.GraphClass import Graph
 
 org_label = {}
 with open("../dataOther/label.txt") as f:

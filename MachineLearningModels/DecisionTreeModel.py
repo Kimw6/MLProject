@@ -1,9 +1,15 @@
+import random
 import time
 
 import numpy as np
 import scipy.io
-from sklearn import tree
-from sklearn.model_selection import KFold, cross_val_score
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
+from sklearn.model_selection import GridSearchCV, cross_val_predict
+from sklearn.tree import DecisionTreeClassifier
+
+from Processing import BalanceData
+from Processing.util import eval_with_kfold
 
 mat = scipy.io.loadmat('../data750.mat')
 org_dat = mat['OriginalData']
@@ -11,47 +17,34 @@ stand_dat = mat['Scaled_Standardization']
 minmax_dat = mat['Scaled_Min_Max']
 label = mat['label'][0]
 
-data = stand_dat
-
-para1 = ['gini', 'entropy']
-para2 = [1, 2, 3, 4, 5]
-para3 = [2, 3, 4]
-
-parameters = {'criterion': ['gini', 'entropy'],
-              'random_state': np.arange(0, 10), 'min_samples_leaf': np.arange(1, 10),
-              'min_samples_split': np.arange(2, 10), 'min_impurity_split': 10.0 ** -np.arange(1, 10)}
-
-best_score = 0
-best_para1 = 0
-best_para2 = 0
-best_para3 = 0
-
+best_sc = 0
+best_x = []
+best_y = []
+best_es = None
 initial_start_time = time.time()
 
-for i in range(len(para1)):
-    for j in range(len(para2)):
-        for k in range(len(para3)):
-            scores = []
-            clf = tree.DecisionTreeClassifier(criterion=para1[i], min_samples_leaf=para2[j], min_samples_split=para3[k])
-            cv = KFold(n_splits=10, random_state=None, shuffle=True)
-            for train_index, test_index in cv.split(data):
-                X_train, X_test, y_train, y_test = data[train_index], data[test_index], \
-                                                   label[train_index], label[test_index]
-                clf.fit(X_train, y_train)
-                scores.append(clf.score(X_test, y_test))
+for i in range(10):
+    random.seed(i)
+    X, y = BalanceData.balance_dt(stand_dat, label, seed=i)
 
-            score_avg = np.mean(scores)
-            if score_avg > best_score:
-                best_score = score_avg
-                best_para1 = para1[i]
-                best_para2 = para2[j]
-                best_para3 = para3[k]
+    parameters = {'criterion': ['gini', 'entropy'],
+                  'min_samples_leaf': np.arange(1, 10),
+                  'min_samples_split': np.arange(2, 10), 'random_state': [i], }
 
-print(best_score, best_para1, best_para2, best_para3)
+    clf = GridSearchCV(DecisionTreeClassifier(), parameters, n_jobs=-1, cv=10, verbose=1, scoring='f1')
+    clf.fit(X, y)
 
+    if clf.best_score_ > best_sc:
+        best_sc = clf.best_score_
+        best_es = clf.best_estimator_
+        best_x = X
+        best_y = y
+
+print("-----------------Results--------------------")
+print("Best score: ", best_sc)
+print(best_es)
 print("Total --- %s seconds ---" % (time.time() - initial_start_time))
 
-# 0.9427027027027028 entropy 5 4 stand data
-clf = tree.DecisionTreeClassifier(criterion='entropy', min_samples_leaf=5, min_samples_split=4)
-sss = cross_val_score(clf, data, label, cv=10)
-print(sss, np.mean(sss))
+aa, bb = BalanceData.balance_dt(stand_dat, label)
+
+eval_with_kfold(best_es, best_x, best_y, aa, bb)

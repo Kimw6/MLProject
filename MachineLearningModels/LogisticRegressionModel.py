@@ -1,3 +1,4 @@
+import random
 import time
 
 import numpy as np
@@ -5,37 +6,42 @@ import scipy.io
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 
+from Processing import BalanceData
+from Processing.util import eval_with_kfold
+
 mat = scipy.io.loadmat('../data750.mat')
 org_dat = mat['OriginalData']
 stand_dat = mat['Scaled_Standardization']
 minmax_dat = mat['Scaled_Min_Max']
 label = mat['label'][0]
 
-data = minmax_dat
-
-parameters = {'solver': ['liblinear', 'lbfgs', 'newton-cg', 'sag', 'saga'],
-              'random_state': np.arange(0, 10), 'max_iter': [100, 300, 500, 1000]}
-
+best_sc = 0
+best_x = []
+best_y = []
+best_es = None
 initial_start_time = time.time()
 
-clf = GridSearchCV(LogisticRegression(), parameters, n_jobs=-1, cv=10, verbose=1)
-clf.fit(data, label)
+for i in range(10):
+    random.seed(i)
+    X, y = BalanceData.balance_dt(stand_dat, label, seed=i)
 
-print("-----------------Results--------------------")
-print("Best score: ", clf.best_score_)
-print("Using the following parameters:")
-print(clf.best_params_)
-print("------------------------------------------------------")
+    parameters = {'solver': ['liblinear', 'lbfgs', 'newton-cg', 'sag', 'saga'],
+                  'random_state': [i], 'max_iter': [100, 300, 500, 1000]}
 
+    clf = GridSearchCV(LogisticRegression(), parameters, n_jobs=-1, cv=10, verbose=1, scoring='recall')
+    clf.fit(X, y)
 
 clf = GridSearchCV(LogisticRegression(), parameters, n_jobs=-1, cv=10, verbose=1)
 clf.fit(stand_dat, label)
-print("-----------------Results--------------------")
-print("Best score: ", clf.best_score_)
-print("Using the following parameters:")
-print(clf.best_params_)
-print("------------------------------------------------------")
+    if clf.best_score_ > best_sc:
+        best_sc = clf.best_score_
+        best_es = clf.best_estimator_
+        best_x = X
+        best_y = y
 
+print("-----------------Results--------------------")
+print("Best score: ", best_sc)
+print(best_es)
 print("Total --- %s seconds ---" % (time.time() - initial_start_time))
 
-# 0.9543243243243245 liblinear
+eval_with_kfold(best_es, best_x, best_y, stand_dat, label)

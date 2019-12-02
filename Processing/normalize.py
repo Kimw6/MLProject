@@ -3,7 +3,7 @@ from numpy import shape
 from scipy.io import savemat
 from sklearn import preprocessing
 
-from PreProcessing.GraphClass import Graph
+from Processing.GraphClass import Graph
 
 with open('data750/countLabelDict.txt') as f:
     count = eval(f.read())
