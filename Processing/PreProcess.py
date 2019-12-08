@@ -35,8 +35,8 @@ for v in graph_part.get_vertices():
     num_edges += len(graph_part.get_vertex(v).get_neighbors())
 print(num_edges)  # 1021786 correct
 
-# with open('NetworkForMotif999.txt', 'w') as f:
-#     for v in graph_part.get_vertices():
-#         vwrite = trans_dict_reverse[v]
-#         for t in graph_part.get_vertex(v).get_neighbors():
-#             f.write("%d %d\n" % (vwrite, trans_dict_reverse[t.id]))
+with open('NetworkForMotif.txt', 'w') as f:
+    for v in graph_part.get_vertices():
+        vwrite = trans_dict_reverse[v]
+        for t in graph_part.get_vertex(v).get_neighbors():
+            f.write("%d %d\n" % (vwrite, trans_dict_reverse[t.id]))

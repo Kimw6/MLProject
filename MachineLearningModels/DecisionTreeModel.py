@@ -25,7 +25,7 @@ initial_start_time = time.time()
 
 for i in range(10):
     random.seed(i)
-    X, y = BalanceData.balance_dt(stand_dat, label, seed=i)
+    X, y = BalanceData.balance_dt(minmax_dat, label, seed=i)
 
     parameters = {'criterion': ['gini', 'entropy'],
                   'min_samples_leaf': np.arange(1, 10),
@@ -45,6 +45,6 @@ print("Best score: ", best_sc)
 print(best_es)
 print("Total --- %s seconds ---" % (time.time() - initial_start_time))
 
-aa, bb = BalanceData.balance_dt(stand_dat, label)
+# aa, bb = BalanceData.balance_dt(stand_dat, label)
 
-eval_with_kfold(best_es, best_x, best_y, aa, bb)
+eval_with_kfold(best_es, best_x, best_y, minmax_dat, label)

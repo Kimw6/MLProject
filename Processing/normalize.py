@@ -5,15 +5,15 @@ from sklearn import preprocessing
 
 from Processing.GraphClass import Graph
 
-with open('data750/countLabelDict.txt') as f:
-    count = eval(f.read())
-
-print(count)
+# with open('../data750/countLabelDict.txt') as f:
+#     count = eval(f.read())
+#
+# print(count)
 
 data = [[0 for i in range(4)] for j in range(3700)]
 print(shape(data))
 
-with open('data750/data750.txt_nemoProfile.txt') as f:
+with open('../data750/data750.txt_nemoProfile.txt') as f:
     for line in f:
         if line.startswith('N'):
             continue
@@ -21,15 +21,16 @@ with open('data750/data750.txt_nemoProfile.txt') as f:
             ll = list(map(int, line.split()))
             data[ll[0]] = ll[1:]
 data = np.array(data)
+
 org_label = {}
-with open("label.txt") as f:
+with open("../dataOther/label.txt") as f:
     for line in f:
         (key, val) = line.split()
         org_label[key.strip()] = val.strip()
 print("label_dict length", len(org_label))
 
 graph_part = Graph()
-with open("networkdata.txt") as f:
+with open("../dataOther/networkdata.txt") as f:
     for line in f:
         v1, v2, w = line.split()
         if v1 in org_label and v2 in org_label and int(w) >= 750:
@@ -64,6 +65,15 @@ min_max_scaler = preprocessing.MinMaxScaler()
 scaled_minmax = min_max_scaler.fit_transform(data)
 
 label_list = np.array(label_list)
+
+
+cccc = 0
+for jj in range(len(data)):
+    if label_list[jj] == 1 and data[jj][0] == 0 and data[jj][1] == 0 and data[jj][2] == 0 and data[jj][3] == 0:
+        cccc = cccc + 1
+print("cccc", cccc)
+
+print(scaled_minmax)
 savemat('data750.mat',
         {'label': label_list, 'OriginalData': data, 'Scaled_Standardization': scaled_dt,
          'Scaled_Min_Max': scaled_minmax})

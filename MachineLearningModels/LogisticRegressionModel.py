@@ -23,7 +23,7 @@ initial_start_time = time.time()
 
 for i in range(10):
     random.seed(i)
-    X, y = BalanceData.balance_dt(stand_dat, label, seed=i)
+    X, y = BalanceData.balance_dt(minmax_dat, label, seed=i)
 
     parameters = {'solver': ['liblinear', 'lbfgs', 'newton-cg', 'sag', 'saga'],
                   'random_state': [i], 'max_iter': [100, 300, 500, 1000]}
@@ -31,8 +31,6 @@ for i in range(10):
     clf = GridSearchCV(LogisticRegression(), parameters, n_jobs=-1, cv=10, verbose=1, scoring='recall')
     clf.fit(X, y)
 
-clf = GridSearchCV(LogisticRegression(), parameters, n_jobs=-1, cv=10, verbose=1)
-clf.fit(stand_dat, label)
     if clf.best_score_ > best_sc:
         best_sc = clf.best_score_
         best_es = clf.best_estimator_
@@ -44,4 +42,4 @@ print("Best score: ", best_sc)
 print(best_es)
 print("Total --- %s seconds ---" % (time.time() - initial_start_time))
 
-eval_with_kfold(best_es, best_x, best_y, stand_dat, label)
+eval_with_kfold(best_es, best_x, best_y, minmax_dat, label)
