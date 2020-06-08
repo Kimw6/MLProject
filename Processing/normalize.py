@@ -10,10 +10,10 @@ from Processing.GraphClass import Graph
 #
 # print(count)
 
-data = [[0 for i in range(4)] for j in range(3700)]
+data = [[0 for i in range(6)] for j in range(3700)]
 print(shape(data))
 
-with open('../data750/data750.txt_nemoProfile.txt') as f:
+with open('../data750/data750.txt_subProfile.txt') as f:
     for line in f:
         if line.startswith('N'):
             continue
@@ -52,6 +52,7 @@ for i in range(idx):
     label_list.append(item)
 
 print("label_list length", shape(label_list))
+
 scaler = preprocessing.StandardScaler().fit(data)
 # print(scaler.mean_)
 # print(scaler.scale_)
@@ -74,6 +75,6 @@ for jj in range(len(data)):
 print("cccc", cccc)
 
 print(scaled_minmax)
-savemat('data750.mat',
+savemat('data750_full.mat',
         {'label': label_list, 'OriginalData': data, 'Scaled_Standardization': scaled_dt,
          'Scaled_Min_Max': scaled_minmax})

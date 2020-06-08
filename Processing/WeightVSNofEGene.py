@@ -13,12 +13,13 @@ wlist.append(999)
 print(len(wlist))
 print(len(elist))
 
+print(wlist)
 
 plt.plot(wlist, elist)
-plt.xlabel('Weight range')
+plt.xlabel('Confidence score')
 # naming the y axis
 plt.ylabel('Number of essential genes')
-plt.title('Number of essential genes by weight range')
+plt.title('Number of essential genes by confidence score')
 plt.ylim(ymin=0)
 plt.ylim(ymax=250)
 plt.grid(True)
